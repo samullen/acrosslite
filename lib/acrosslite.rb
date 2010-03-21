@@ -1,5 +1,8 @@
 require 'stringio'
 
+require File.join(File.dirname(__FILE__), 'entry')
+
+
 class Acrosslite
   attr_reader :title, :author, :across, :down, :solution, :diagram, :columns, 
               :rows, :copyright
@@ -30,26 +33,32 @@ class Acrosslite
 
     opts = DEFAULT_OPTIONS.merge opts
 
-    @filepath  = opts[:filepath]
-    @content   = opts[:content]
+    @filepath   = opts[:filepath]
+    @content    = opts[:content]
 
-    @across    = Hash.new
-    @down      = Hash.new
-    @layout    = Array.new
-    @solution  = Array.new
-    @diagram   = Array.new
-    @author    = String.new
-    @title     = String.new
-    @copyright = String.new
-  end
+    @content_io = String.new
 
-  def self.from_file(filename)
-    new(:content => open(filename).read)
+    @across     = Array.new
+    @down       = Array.new
+    @layout     = Array.new
+    @solution   = Array.new
+    @diagram    = Array.new
+    @author     = String.new
+    @title      = String.new
+    @copyright  = String.new
   end
 
   def content
     @content ||= read_puzzle
   end
+
+#   def self.from_file(filename)
+#     @acrosslite = new
+#     @acrosslite.read_puzzle(filename)
+#     @acrosslite.parse
+#     self
+#   end
+
 
 =begin rdoc
 The parse method takes the puzzle loaded into content and breaks it out into the
@@ -59,20 +68,20 @@ following attributes: rows, columns, solution, diagram, title, author, copyright
 def parse
 	clues = Array.new
 
-	@content = StringIO.new @content
-	@content.seek(44)
+	@content_io = StringIO.new content
+	@content_io.seek(44)
 
-	@rows, @columns = @content.read(2).unpack("C C")
-	@content.seek(52)
+	@rows, @columns = @content_io.read(2).unpack("C C")
+	@content_io.seek(52)
 
 	#----- solution -----#
 	1.upto(@rows) do |r|
-		@solution << @content.read(@columns).unpack("C" * @columns).map {|c| c.chr}
+		@solution << @content_io.read(@columns).unpack("C" * @columns).map {|c| c.chr}
 	end
 
 	#----- diagram -----#
 	1.upto(@rows) do |r|
-		@diagram << @content.read(@columns).unpack("C" * @columns).map {|c| c.chr}
+		@diagram << @content_io.read(@columns).unpack("C" * @columns).map {|c| c.chr}
 	end
 
 	@title = next_field
@@ -80,74 +89,81 @@ def parse
 	@copyright = next_field
 
 	#----- build clues array -----#
-	until @content.eof? do
+	until @content_io.eof? do
 		clues << next_field
 	end
 
 	#----- determine answers -----#
-	a_clue = d_clue = 1 # clue_number: incremented only in "down" section
+	across_clue = down_clue = 1 # clue_number: incremented only in "down" section
+
 	0.upto(@rows - 1) do |r|
 		0.upto(@columns - 1) do |c|
 			next if @solution[r][c] =~ /[.:]/
 
 			if c - 1 < 0 || @solution[r][c - 1] == "."
-				@across[a_clue] = Hash.new
+        entry = Entry.new
+        answer = ''
+
 				c.upto(@columns - 1) do |cc|
 					char = @solution[r][cc]
 
 					if char != '.'
-						@across[a_clue][:solution] ||= ""
-						@across[a_clue][:solution] += char
+            answer += char
 					end
 
 					if char == "." || cc + 1 >= @columns
-						@across[a_clue][:direction] = 'across'
-						@across[a_clue][:clue] = clues.shift
-						@across[a_clue][:clue_number] = a_clue
-						@across[a_clue][:row] = r
-						@across[a_clue][:column] = c
-						@across[a_clue][:length] = @across[a_clue][:solution].length
-						@across[a_clue][:cell_number] = r * @columns + c + 1
+            entry.direction   = "across"
+            entry.clue        = clues.shift
+            entry.clue_number = across_clue
+            entry.row         = r
+            entry.column      = c
+            entry.length      = answer.size
+            entry.cell_number = r * @columns + c + 1
 
-						a_clue += 1
+            @across << entry
+						across_clue += 1
 						break
 					end
 				end
 			end
 
 			if r - 1 < 0 || @solution[r - 1][c] == "."
-				@down[d_clue] = Hash.new
+        entry = Entry.new
+        answer = ''
+
 				r.upto(@rows - 1) do |rr|
-					char = @solution[rr][c]
+          char = @solution[rr][c]
 
 					if char != '.'
-						@down[d_clue][:solution] ||= ""
-						@down[d_clue][:solution] += char
+            answer += char
 					end
 
 					if char == "." || rr + 1 >= @rows
-						@down[d_clue][:direction] = "across"
-						@down[d_clue][:clue] = clues.shift
-						@down[d_clue][:clue_number] = d_clue
-						@down[d_clue][:row] = r
-						@down[d_clue][:column] = c
-						@down[d_clue][:length] = @down[d_clue][:solution].length
-						@down[d_clue][:cell_number] = r * @columns + c + 1
+            entry.direction   = "down"
+            entry.clue        = clues.shift
+            entry.clue_number = down_clue
+            entry.row         = r
+            entry.column      = c
+            entry.length      = answer.size
+            entry.cell_number = r * @columns + c + 1
 
-						d_clue += 1
+            @across << entry
+						down_clue += 1
 						break
 					end
 				end
 			end
 
-			if a_clue > d_clue
-				d_clue = a_clue
+			if across_clue > down_clue
+				down_clue = across_clue
 			else
-				a_clue = d_clue
+				across_clue = down_clue
 			end
 		end
 	end
 end
+
+
 
 =begin rdoc
 If a filehandle or filepath were provided, open reads in the file's contents
@@ -169,8 +185,8 @@ private
 def next_field
 	string = String.new
 
-	while c = @content.getc
-		string += c.chr
+	while (c = @content_io.getc.chr) != "\0"
+		string += c
 	end
 
 	return string

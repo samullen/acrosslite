@@ -29,8 +29,13 @@ describe Acrosslite do
     ac = Acrosslite.new(:content => File.open(@example_files[:halloween]).read)
     ac.should be_an_instance_of Acrosslite
     ac.content.should == File.open(@example_files[:halloween]).read
+
+#     ac = Acrosslite.from_file(@example_files[:halloween])
+#     ac.should be_an_instance_of Acrosslite
+#     ac.content.should == File.open(@example_files[:halloween]).read
   end
 
+#   it "should 
 #   it "should instantiate the puzzle from_file" do
 #     ac = Acrosslite.from_file(@example_files[:halloween])
 #     ac.content.should == File.open(@example_files[:halloween]).read
