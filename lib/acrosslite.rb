@@ -114,6 +114,7 @@ def parse
 					if char == "." || cc + 1 >= @columns
             entry.direction   = "across"
             entry.clue        = clues.shift
+            entry.answer      = answer
             entry.clue_number = across_clue
             entry.row         = r
             entry.column      = c

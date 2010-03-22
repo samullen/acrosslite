@@ -30,6 +30,10 @@ describe Acrosslite do
     ac.should be_an_instance_of Acrosslite
     ac.content.should == File.open(@example_files[:halloween]).read
 
+ac.parse
+puts ac.across.first.clue
+puts ac.solution[0]
+# puts ac.across.size
 #     ac = Acrosslite.from_file(@example_files[:halloween])
 #     ac.should be_an_instance_of Acrosslite
 #     ac.content.should == File.open(@example_files[:halloween]).read
