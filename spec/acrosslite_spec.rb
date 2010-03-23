@@ -50,19 +50,16 @@ describe Acrosslite do
 
   it "should retrieve meta data about the puzzle" do
     ac = Acrosslite.new(:filepath => @example_files[:tmcal])
-    ac.parse
     ac.title.should == 'LA Times, Sat, Mar 6, 2010'
     ac.author.should == 'Barry C. Silk / Ed. Rich Norris'
 #     ac.copyright.should == "© 2010 Tribune Media Services, Inc."
 
     ac = Acrosslite.new(:filepath => @example_files[:crnet])
-    ac.parse
     ac.title.should == '03/06/10 SATURDAY STUMPER'
     ac.author.should == 'Merle Baker , edited by Stanley Newman'
 #     ac.copyright.should == "© Copyright 2010 Stanley Newman, Distributed by Creators Syndicate, Inc."
 
     ac = Acrosslite.new(:filepath => @example_files[:xp])
-    ac.parse
     ac.title.should == ''
     ac.author.should == ''
     ac.copyright.should == ''
@@ -70,7 +67,6 @@ describe Acrosslite do
 
   it "should retrieve the data for each of the entries" do
     ac = Acrosslite.new(:filepath => @example_files[:halloween])
-    ac.parse
     ac.across.first.clue.should == "Item sought by kids in costumes"
     ac.across.first.answer.should == "CANDY"
     ac.across.first.clue_number.should == 1

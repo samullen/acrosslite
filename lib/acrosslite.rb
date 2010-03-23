@@ -4,11 +4,10 @@ require File.join(File.dirname(__FILE__), 'entry')
 
 
 class Acrosslite
-  attr_reader :across, :down, :solution, :diagram, :copyright, :title, :author
-  attr_accessor :filepath
-  attr_writer :content
+  attr_reader :across, :down, :solution, :diagram, :copyright, :title, :author,
+              :filepath
 
-  VERSION = '0.0.1'
+  VERSION = '0.1.0'
 
   ACROSSLITE = 2
   ROWS       = 44
@@ -47,21 +46,11 @@ class Acrosslite
     @layout     = Array.new
     @solution   = Array.new
     @diagram    = Array.new
-    @author     = String.new
-    @title      = String.new
-    @copyright  = String.new
   end
 
   def content
     @content ||= read_puzzle
   end
-
-#   def self.from_file(filename)
-#     @acrosslite = new
-#     @acrosslite.read_puzzle(filename)
-#     @acrosslite.parse
-#     self
-#   end
 
   def rows
     unless @rows 
@@ -82,9 +71,11 @@ class Acrosslite
   def solution
     width = columns
 
+#     if @solution.empty?
     unless @solution.size == rows
       @content_io.seek(SOLUTION)
       rows.times do |r|
+puts @content_io.pos
         @solution << @content_io.read(width).unpack("C#{width}").map {|c| c.chr}
       end
     end
@@ -94,7 +85,7 @@ class Acrosslite
   def diagram
     width = columns
 
-    unless @diagram.size == rows
+    if @diagram.empty?
       @content_io.seek(SOLUTION + rows * width)
       rows.times do |r|
         @diagram << @content_io.read(width).unpack("C#{width}").map {|c| c.chr}
@@ -106,96 +97,46 @@ class Acrosslite
   def area
     rows * columns
   end
-=begin rdoc
-The parse method takes the puzzle loaded into content and breaks it out into the
-following attributes: rows, columns, solution, diagram, title, author, copyright, across, and down.
-=end
 
-def parse
-	clues = Array.new
+  def across
+    if @across.empty?
+      parse
+    end
 
-  @content_io.seek(SOLUTION + area + area)
+    @across
+  end
 
-	@title = next_field
-	@author = next_field
-	@copyright = next_field
+  def down
+    if @down.empty?
+      parse
+    end
 
-	#----- build clues array -----#
-	until @content_io.eof? do
-		clues << next_field
-	end
+    @down
+  end
 
-	#----- determine answers -----#
-	across_clue = down_clue = 1 # clue_number: incremented only in "down" section
+  def title
+    unless @title
+      parse
+    end
 
-	0.upto(rows - 1) do |r|
-		0.upto(columns - 1) do |c|
-			next if solution[r][c] =~ /[.:]/
+    @title
+  end
 
-			if c - 1 < 0 || solution[r][c - 1] == "."
-        entry = Entry.new
-        answer = ''
+  def author
+    unless @author
+      parse
+    end
 
-				c.upto(columns - 1) do |cc|
-					char = solution[r][cc]
+    @author
+  end
 
-					if char != '.'
-            answer += char
-					end
+  def copyright
+    unless @copyright
+      parse
+    end
 
-					if char == "." || cc + 1 >= columns
-            entry.direction   = "across"
-            entry.clue        = clues.shift
-            entry.answer      = answer
-            entry.clue_number = across_clue
-            entry.row         = r
-            entry.column      = c
-            entry.length      = answer.size
-            entry.cell_number = r * columns + c + 1
-
-            @across << entry
-						across_clue += 1
-						break
-					end
-				end
-			end
-
-			if r - 1 < 0 || solution[r - 1][c] == "."
-        entry = Entry.new
-        answer = ''
-
-				r.upto(rows - 1) do |rr|
-          char = solution[rr][c]
-
-					if char != '.'
-            answer += char
-					end
-
-					if char == "." || rr + 1 >= rows
-            entry.direction   = "down"
-            entry.clue        = clues.shift
-            entry.answer      = answer
-            entry.clue_number = down_clue
-            entry.row         = r
-            entry.column      = c
-            entry.length      = answer.size
-            entry.cell_number = r * columns + c + 1
-
-            @down << entry
-						down_clue += 1
-						break
-					end
-				end
-			end
-
-			if across_clue > down_clue
-				down_clue = across_clue
-			else
-				across_clue = down_clue
-			end
-		end
-	end
-end
+    @copyright
+  end
 
 =begin rdoc
 If a filehandle or filepath were provided, open reads in the file's contents
@@ -227,5 +168,96 @@ end
 def content_io
   @content_io ||= StringIO.new @content
 end
+
+=begin rdoc
+The parse method takes the puzzle loaded into content and breaks it out into the
+following attributes: rows, columns, solution, diagram, title, author, copyright, across, and down.
+=end
+
+  def parse
+    clues = Array.new
+
+    @content_io.seek(SOLUTION + area + area)
+
+    @title = next_field
+    @author = next_field
+    @copyright = next_field
+
+    #----- build clues array -----#
+    until @content_io.eof? do
+      clues << next_field
+    end
+
+    #----- determine answers -----#
+    across_clue = down_clue = 1 # clue_number: incremented only in "down" area
+
+    0.upto(rows - 1) do |r|
+      0.upto(columns - 1) do |c|
+        next if solution[r][c] =~ /[.:]/
+
+        if c - 1 < 0 || solution[r][c - 1] == "."
+          entry = Entry.new
+          answer = ''
+
+          c.upto(columns - 1) do |cc|
+            char = solution[r][cc]
+
+            if char != '.'
+              answer += char
+            end
+
+            if char == "." || cc + 1 >= columns
+              entry.direction   = "across"
+              entry.clue        = clues.shift
+              entry.answer      = answer
+              entry.clue_number = across_clue
+              entry.row         = r
+              entry.column      = c
+              entry.length      = answer.size
+              entry.cell_number = r * columns + c + 1
+
+              @across << entry
+              across_clue += 1
+              break
+            end
+          end
+        end
+
+        if r - 1 < 0 || solution[r - 1][c] == "."
+          entry = Entry.new
+          answer = ''
+
+          r.upto(rows - 1) do |rr|
+            char = solution[rr][c]
+
+            if char != '.'
+              answer += char
+            end
+
+            if char == "." || rr + 1 >= rows
+              entry.direction   = "down"
+              entry.clue        = clues.shift
+              entry.answer      = answer
+              entry.clue_number = down_clue
+              entry.row         = r
+              entry.column      = c
+              entry.length      = answer.size
+              entry.cell_number = r * columns + c + 1
+
+              @down << entry
+              down_clue += 1
+              break
+            end
+          end
+        end
+
+        if across_clue > down_clue
+          down_clue = across_clue
+        else
+          across_clue = down_clue
+        end
+      end
+    end
+  end
 
 end
