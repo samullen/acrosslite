@@ -1,0 +1,88 @@
+= Acrosslite
+
+http://github.com/samullen/acrosslite
+
+A Ruby library for parsing Across Lite crossword puzzle (.puz) files.
+
+The Across Lite format is probably the most popular format for encoding
+crossword puzzles. This library in its current incarnation provides a means for
+retrieving the encoded crossword information from that format. In the future I
+may take a go at building an encoder, but there are some legal issues around
+doing such.
+
+For more information about acrosslite, go to http://litsoft.com.
+
+== Installation
+
+The acrosslite gem is hosted on RubyGems (http://rubygems.org).
+
+== Getting Started
+
+Instantiation of the library can be done in one of two ways: 1) passing in the full path to a file; 2) by passing in the puzzle blob.
+
+  require 'acrosslite'
+
+  ac = Acrosslite.new(:filepath => "/path/to/the/puzzle/file.puz")
+
+    -- Or --
+
+  blob = open("/path/to/the/puzzle/file.puz", "r").read
+  ac = Acrosslite.new(:content => blob)
+  
+Useful information about the puzzle can be retrieved with a handful of method
+calls.
+
+=== Puzzle Meta
+
+  ac.title         # -> Title of the puzzle
+  ac.author        # -> Author of the puzzle
+  ac.copyright     # -> Puzzle Copyright
+
+=== Puzzle Content
+
+  ac.diagram       # -> two-dimensional matrix of the diagram 
+  ac.solution      # -> two-dimensional matrix of the solution
+
+  ac.rows          # -> Array of Acrosslite::Entry objects
+  ac.columns       # -> Array of Acrosslite::Entry objects
+
+Acrosslite::Entry objects are broken down thusly:
+
+  ac.direction - The direction the answer goes (across, down)
+  ac.clue - The clue to provide an answer for
+  ac.clue_number - Clue number represented by the little number in a crossword cell
+  ac.row - What row the answer begins on (zero-based).
+  ac.column - What column the answer begins on (zero-based).
+  ac.length - The length of the answer
+  ac.cell_number - The "physical" cell the answer begins on
+  ac.answer - The answer
+
+== Other
+
+  US Crossword Rules: 
+  http://www.maa.org/editorial/mathgames/mathgames_05_10_04.html
+
+  The rules for American crosswords are as follows:
+
+  1. The pattern of black-and-white squares must be symmetrical.  Generally this rule means that if you turn the grid upside-down, the pattern will look the same as it does right-side-up.
+  2. Do not use too many black squares.  In the old days of puzzles, black squares were not allowed to occupy more than 16% of a grid.  Nowadays there is no strict limit, in order to allow maximum flexibility for the placement of theme entries.  Still, "cheater" black squares (ones that do not affect the number of words in the puzzle, but are added to make constructing easier) should be kept to a minimum, and large clumps of black squares anywhere in a grid are strongly discouraged.
+  3. Do not use unkeyed letters (letters that appear in only one word across or down).  In fairness to solvers, every letter has to be appear in both an Across and a Down word.
+  4. Do not use two-letter words.  The minimum word length is three letters.
+  5. The grid must have all-over interlock.  In other words, the black squares may not cut the grid up into separate pieces.  A solver, theoretically, should be able to able to proceed from any section of the grid to any other without having to stop and start over.
+  6. Long theme entries must be symmetrically placed.  If there is a major theme entry three rows down from the top of the grid, for instance, then there must be another theme entry in the same position three rows up from the bottom.  Also, as a general rule, no nontheme entry should be longer than any theme entry.
+  7. Do not repeat words in the grid.
+  8. Do not make up words and phrases.  Every answer must have a reference or else be in common use in everyday speech or writing.
+  9. (Modern rule) The vocabulary in a crossword must be lively and have very little obscurity.
+
+== Acknowledgements
+
+* Doug Sparling who created the perl Convert-AcrossLite library (http://cpansearch.perl.org/src/DSPARLING/Convert-AcrossLite-0.10/README). I also credit him with getting me into Ruby and getting me excited about programming again.
+* Bob Newell (http://www.gtoal.com/wordgames/gene/AcrossLite) who originally decyphered  the Acrosslite format to begin with.
+
+== Author
+
+Samuel Mullen <samullen@gmail.com>
+
+== Copyright
+
+Copyright(c) 2010 Samuel Mullen (samullen). See LICENSE for details

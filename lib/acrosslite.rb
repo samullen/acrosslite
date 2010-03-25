@@ -2,12 +2,11 @@ require 'stringio'
 
 require File.join(File.dirname(__FILE__), 'entry')
 
-
 class Acrosslite
   attr_reader :across, :down, :solution, :diagram, :copyright, :title, :author,
               :filepath
 
-  VERSION = '0.1.0'
+  VERSION = '0.2.0'
 
   ACROSSLITE = 2
   ROWS       = 44
@@ -74,8 +73,8 @@ class Acrosslite
 #     if @solution.empty?
     unless @solution.size == rows
       @content_io.seek(SOLUTION)
+
       rows.times do |r|
-puts @content_io.pos
         @solution << @content_io.read(width).unpack("C#{width}").map {|c| c.chr}
       end
     end
@@ -87,6 +86,7 @@ puts @content_io.pos
 
     if @diagram.empty?
       @content_io.seek(SOLUTION + rows * width)
+
       rows.times do |r|
         @diagram << @content_io.read(width).unpack("C#{width}").map {|c| c.chr}
       end
@@ -196,7 +196,7 @@ following attributes: rows, columns, solution, diagram, title, author, copyright
         next if solution[r][c] =~ /[.:]/
 
         if c - 1 < 0 || solution[r][c - 1] == "."
-          entry = Entry.new
+          entry = Acrosslite::Entry.new
           answer = ''
 
           c.upto(columns - 1) do |cc|
@@ -224,7 +224,7 @@ following attributes: rows, columns, solution, diagram, title, author, copyright
         end
 
         if r - 1 < 0 || solution[r - 1][c] == "."
-          entry = Entry.new
+          entry = Acrosslite::Entry.new
           answer = ''
 
           r.upto(rows - 1) do |rr|
