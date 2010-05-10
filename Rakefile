@@ -22,7 +22,6 @@ gem_spec = Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "lib/acrosslite.rb",
-    "lib/entry.rb",
     "lib/entry.rb"
   ] + s.test_files
 end
