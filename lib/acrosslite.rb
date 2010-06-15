@@ -6,7 +6,7 @@ class Acrosslite
   attr_accessor :copyright, :title, :author
   attr_reader :across, :down, :solution, :diagram, :filepath
 
-  VERSION = '0.2.1'
+  VERSION = '0.2.2'
 
   ACROSSLITE = 2
   ROWS       = 44
@@ -180,8 +180,8 @@ following attributes: rows, columns, solution, diagram, title, author, copyright
     @content_io.seek(SOLUTION + area + area)
 
     @title = next_field
-    @author = next_field
-    @copyright = next_field
+    @author = next_field.sub(/^by\s+/i, '')
+    @copyright = next_field.gsub(/^[^a-z_\-]+/i, '')
 
     #----- build clues array -----#
     until @content_io.eof? do
