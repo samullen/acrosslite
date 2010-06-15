@@ -3,10 +3,10 @@ require 'stringio'
 require File.join(File.dirname(__FILE__), 'entry')
 
 class Acrosslite
-  attr_reader :across, :down, :solution, :diagram, :copyright, :title, :author,
-              :filepath
+  attr_accessor :copyright, :title, :author
+  attr_reader :across, :down, :solution, :diagram, :filepath
 
-  VERSION = '0.2.0'
+  VERSION = '0.2.1'
 
   ACROSSLITE = 2
   ROWS       = 44
