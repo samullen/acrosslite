@@ -6,7 +6,7 @@ class Acrosslite
   attr_accessor :copyright, :title, :author
   attr_reader :across, :down, :solution, :diagram, :filepath
 
-  VERSION = '0.2.3'
+  VERSION = '0.3.0'
 
   ACROSSLITE = 2
   ROWS       = 44
@@ -53,7 +53,7 @@ class Acrosslite
 
   def rows
     unless @rows 
-      @content_io.seek(ROWS)
+      @content_io.seek(ROWS, 0)
       @rows = @content_io.read(1).unpack('C').first
     end
     @rows
@@ -61,7 +61,7 @@ class Acrosslite
 
   def columns
     unless @columns 
-      @content_io.seek(COLUMNS)
+      @content_io.seek(COLUMNS, 0)
       @columns = @content_io.read(1).unpack('C').first
     end
     @columns
@@ -69,12 +69,12 @@ class Acrosslite
 
   def solution
     width = columns
+    height = rows
 
-#     if @solution.empty?
-    unless @solution.size == rows
-      @content_io.seek(SOLUTION)
+    if @solution.empty?
+      @content_io.seek(SOLUTION, 0)
 
-      rows.times do |r|
+      height.times do |r|
         @solution << @content_io.read(width).unpack("C#{width}").map {|c| c.chr}
       end
     end
@@ -83,11 +83,12 @@ class Acrosslite
 
   def diagram
     width = columns
+    height = rows
 
     if @diagram.empty?
-      @content_io.seek(SOLUTION + rows * width)
+      @content_io.seek(SOLUTION + height * width, 0)
 
-      rows.times do |r|
+      height.times do |r|
         @diagram << @content_io.read(width).unpack("C#{width}").map {|c| c.chr}
       end
     end
@@ -177,7 +178,7 @@ following attributes: rows, columns, solution, diagram, title, author, copyright
   def parse
     clues = Array.new
 
-    @content_io.seek(SOLUTION + area + area)
+    @content_io.seek(SOLUTION + area + area, 0)
 
     @title = next_field
     @author = next_field
@@ -191,11 +192,11 @@ following attributes: rows, columns, solution, diagram, title, author, copyright
     #----- determine answers -----#
     across_clue = down_clue = 1 # clue_number: incremented only in "down" area
 
-    0.upto(rows - 1) do |r|
-      0.upto(columns - 1) do |c|
-        next if solution[r][c] =~ /[.:]/
+    rows.times do |r|
+      columns.times do |c|
+        next if diagram[r][c] =~ /[.:]/
 
-        if c - 1 < 0 || solution[r][c - 1] == "."
+        if (c - 1 < 0 || diagram[r][c - 1] == ".") && (c + 1 < columns && diagram[r][c + 1] != ".")
           entry = Acrosslite::Entry.new
           answer = ''
 
@@ -223,7 +224,7 @@ following attributes: rows, columns, solution, diagram, title, author, copyright
           end
         end
 
-        if r - 1 < 0 || solution[r - 1][c] == "."
+        if (r - 1 < 0 || diagram[r - 1][c] == ".") && (r + 1 < rows && diagram[r + 1][c] != ".")
           entry = Acrosslite::Entry.new
           answer = ''
 

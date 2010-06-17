@@ -8,7 +8,7 @@ describe Acrosslite do
     @example_files[:halloween] = File.join(basedir, "files/halloween2009.puz")
     @example_files[:crnet]     = File.join(basedir, "files/crnet100306.puz")
     @example_files[:tmcal]     = File.join(basedir, "files/tmcal100306.puz")
-    @example_files[:xp]        = File.join(basedir, "files/xp100306.puz")
+    @example_files[:xp]        = File.join(basedir, "files/xp110316.puz")
     @example_files[:ydx]       = File.join(basedir, "files/ydx100515.puz")
   end
 
@@ -21,7 +21,6 @@ describe Acrosslite do
   #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
   # Builder Tests
   #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-
   it "should instantiate the puzzle with passing of file" do
     ac = Acrosslite.new(:filepath => @example_files[:halloween])
     ac.should be_an_instance_of Acrosslite
