@@ -6,11 +6,11 @@ class Acrosslite
   attr_accessor :copyright, :title, :author
   attr_reader :across, :down, :solution, :diagram, :filepath
 
-  VERSION = '0.3.0'
+  VERSION = '0.4.0'
 
   ACROSSLITE = 2
-  ROWS       = 44
-  COLUMNS    = 45
+  COLUMNS    = 44
+  ROWS       = 45
   SOLUTION   = 52
 
   DEFAULT_OPTIONS = {

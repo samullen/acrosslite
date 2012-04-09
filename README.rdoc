@@ -43,8 +43,8 @@ calls.
   ac.diagram       # -> two-dimensional matrix of the diagram 
   ac.solution      # -> two-dimensional matrix of the solution
 
-  ac.rows          # -> Array of Acrosslite::Entry objects
-  ac.columns       # -> Array of Acrosslite::Entry objects
+  ac.rows          # -> Number of rows
+  ac.columns       # -> Number of columns
 
 Acrosslite::Entry objects are broken down thusly:
 
